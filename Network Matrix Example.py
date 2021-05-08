@@ -9,37 +9,37 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from networkx.algorithms import community
 
-#get file paths for edge and node data
-raw_data = pd.read_csv('linked accounts.csv')
+#read the csv table of relationships we want to graph
+raw_data = pd.read_csv('linked nodes.csv')
 
-#fill blank cells with data
-#raw_data.fillna("None",inplace = True)
+#print to view data
+print(raw_data)
 
-#print(raw_data)
+#unpivot the data so that we have our data into a two column edge list. 
+melted_data = raw_data.melt(['Account'],value_vars =['US','CANADA','MEXICO'],var_name = 'Relationship')
+## need to figure out how to store country column header as an attribute variable for the edge list
+## right now relation ship arrows are dicted by the value given in the account column
+##
+## Example:
+## in our list we have (Account(1),'Any Country Column'(2))
+## we draw this relationship as (1) --- > (2)
 
-#format data so that we have a unique combination for each account and its respective connections
-melted_data = raw_data.melt(['Account'],value_vars =['US','CANADA','MEXICO'],var_name = 'Source Company')
-List_Remove = ["<<Presumably -- Insufficient Permissions>>","None", "<<Unknown>>","<<Presumably -- Store locked out>>","<<Unknown - store locked out>>"]
+## jf later in the list we see (Account(2),'Any Country Column'(1))
+## we draw update the two nodes to look like this  (1) < --- > (2)
+## 
+## We cannot show  a relationship between a unique entry value and its column value
 
-#print(melted_data)
-
-#inplace = True replaces the previous value of the variable, default is False
-melted_data.drop(melted_data[melted_data['value'].isin(List_Remove)].index, inplace = True) 
-
-#cleaned_data = melted_d
-# ata[melted_data['value' != "No Related Company"]]
-
-#print(cleaned_data)
-
-#runs networkx algo to create network matrix based off givine data, node source, target edge, with directional graphing
+#creates a graph made of the edgelist we formatted above
 G = nx.from_pandas_edgelist(melted_data, source = "Account", edge_attr = True, target = "value", create_using=nx.DiGraph)
 
+
 #Allow the user to choose what kind of network matrix they would like to create
-userGraph = input("Choose a network matrix to draw: Circular, Network: ")
-if userGraph == "Circular":
+userGraph = input("Choose a network matrix to draw: (C)ircular, (N)etwork: ")
+if userGraph == "Circular" or "C":
     nx.draw_circular(G,with_labels = True)
 
-elif userGraph == "Network":
+
+elif userGraph == "Network" or  "N":
     nx.draw_networkx(G,with_labels = True)
 else:
     nx.draw(G,with_labels = True)
@@ -51,6 +51,6 @@ plt.show()
 
 ###TO DO####
 
-#As of now I am unsrue if all connections are shown, I need to find a way to drop the "No Related Comapny" Node
-#Key companies with their respective country then group nodes by their country
-#verify network accuracy
+##Key nodes with their respective country then group nodes by their country
+
+##verify network accuracy
